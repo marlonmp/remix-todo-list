@@ -1,5 +1,5 @@
-import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { json, redirect } from "@remix-run/node";
+import { Link, useLoaderData } from "@remix-run/react";
 
 import moment from "moment";
 
@@ -17,7 +17,7 @@ export const loader = async () => {
     const response = await fetch('http://127.0.0.1:8090/api/collections/todos/records')
     const { items } = await response.json();
 
-    return json({ todos: items });
+    return json({ todos: items as TodoItem[] });
 };
 
 function NoItem() {
@@ -59,16 +59,18 @@ function Item({ id, title, description, is_done, created } : TodoItem) {
     );
 }
 
-export default function TodoList() {
-    const { todos } = useLoaderData() as any;
+export default function Index() {
+    const { todos } = useLoaderData<typeof loader>();
 
-    const items = !todos?.length ? <NoItem /> : todos.map((item: TodoItem) => <Item key={item.id} {...item} />);
+    const items = !todos?.length ? <NoItem /> : todos.map(item => <Item key={item.id} {...item} />);
 
     return (
         <div className="w-full flex flex-col space-y-6">
             <div className="w-full flex flex-row justify-between items-center">
                 <div className="font-bold text-white">Todo list</div>
-                <div className="px-4 py-2 font-bold rounded-md text-white bg-green-600 hover:cursor-pointer hover:bg-green-700">Add todo</div>
+                <Link className="px-4 py-2 font-bold rounded-md text-white bg-green-600 hover:cursor-pointer hover:bg-green-700" to={'/todos/create'}>
+                    Add todo
+                </Link>
             </div>
 
             <div className="w-full flex flex-col items-center space-y-4">{items}</div>
